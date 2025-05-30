@@ -14,7 +14,7 @@ from io import BytesIO
 
 # Konfigurace stránky
 st.set_page_config(
-    page_title="AI Verification Tool",
+    page_title="AI Visibility Tool",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -69,7 +69,7 @@ st.markdown("""
 # Hlavičku aplikace
 st.markdown("""
 <div class="main-header">
-    <h1>🔍 AI Verification Tool</h1>
+    <h1>🔍 AI Visibility Tool</h1>
     <p>Ověření zobrazení značky v AI - Komplexní analýza</p>
 </div>
 """, unsafe_allow_html=True)
@@ -89,13 +89,15 @@ with st.sidebar:
     st.info("🔧 API klíče jsou předkonfigurovány")
 
 # Hlavní formulář
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     brand = st.text_input("🏷️ Brand", placeholder="Brand")
-    domena = st.text_input("🌐 Doména", placeholder="https://www.zadej-domenu.cz/")
 
 with col2:
+    domena = st.text_input("🌐 Doména", placeholder="https://www.zadej-domenu.cz/")
+
+with col3:
     zeme = st.selectbox(
         "🌍 Země",
         ["Česká republika", "Slovensko", "Polsko", "Německo", "Rakousko", "Maďarsko"]
@@ -527,4 +529,4 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
 
 # Footer
 st.markdown("---")
-st.markdown("*🔍 AI Verification Tool - Vytvořeno pro analýzu zmínek značky v AI odpovědích*")
+st.markdown("*🔍 AI Visibility Tool - Vytvořeno pro analýzu zmínek značky v AI odpovědích*")
