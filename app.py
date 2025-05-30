@@ -105,24 +105,40 @@ with col2:
 # Funkce pro web scraping
 def scrape_website(domain: str) -> str:
     """Stáhne a zpracuje obsah webové stránky"""
-    urls_to_try = [f"https://{domain}", f"http://{domain}", f"https://www.{domain}", f"http://www.{domain}"]
+    # Vyčištění domény od protokolů
+    clean_domain = domain.replace("https://", "").replace("http://", "").replace("www.", "").strip("/")
+    
+    urls_to_try = [
+        f"https://{clean_domain}", 
+        f"http://{clean_domain}", 
+        f"https://www.{clean_domain}", 
+        f"http://www.{clean_domain}"
+    ]
     
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'cs,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'Connection': 'keep-alive',
     }
     
     # Session s omezeným počtem redirectů
     session = requests.Session()
-    session.max_redirects = 5
+    session.max_redirects = 3
     
-    for url in urls_to_try:
+    for i, url in enumerate(urls_to_try, 1):
         try:
+            st.write(f"🔍 Zkouším URL {i}/{len(urls_to_try)}: {url}")
+            
             response = session.get(
                 url, 
                 headers=headers, 
-                timeout=30, 
-                allow_redirects=True
+                timeout=15,  # Kratší timeout
+                allow_redirects=True,
+                verify=False  # Přeskočit SSL verifikaci pro problematické weby
             )
+            
             if response.status_code == 200:
                 soup = BeautifulSoup(response.content, 'html.parser')
                 
@@ -141,23 +157,31 @@ def scrape_website(domain: str) -> str:
                     text = text[:MAX_LENGTH] + "... (text byl zkrácen)"
                 
                 # Kontrola, zda jsme získali smysluplný obsah
-                if len(text.strip()) < 100:
-                    continue  # Zkusit další URL
+                if len(text.strip()) < 50:
+                    st.warning(f"⚠️ Příliš málo obsahu z {url} - zkouším další...")
+                    continue
                 
+                st.success(f"✅ Úspěšně načten obsah z {url}")
                 return text
                 
-        except requests.exceptions.TooManyRedirects:
-            st.warning(f"⚠️ Příliš mnoho redirectů pro {url} - zkouším další variantu...")
+        except requests.exceptions.SSLError:
+            st.warning(f"⚠️ SSL chyba pro {url} - zkouším další variantu...")
+            continue
+        except requests.exceptions.ConnectionError:
+            st.warning(f"⚠️ Chyba připojení k {url} - zkouším další variantu...")
             continue
         except requests.exceptions.Timeout:
             st.warning(f"⚠️ Timeout pro {url} - zkouším další variantu...")
             continue
+        except requests.exceptions.TooManyRedirects:
+            st.warning(f"⚠️ Příliš mnoho redirectů pro {url} - zkouším další variantu...")
+            continue
         except Exception as e:
-            st.warning(f"⚠️ Chyba při načítání {url}: {str(e)} - zkouším další variantu...")
+            st.warning(f"⚠️ Neočekávaná chyba pro {url}: {str(e)}")
             continue
     
     # Fallback - použijeme obecné oblasti
-    st.warning(f"⚠️ Nepodařilo se načíst obsah z {domain}. Použiji obecné oblasti marketingu.")
+    st.info(f"ℹ️ Nepodařilo se načíst obsah z {clean_domain}. Aplikace použije obecné oblasti marketingu a bude pokračovat v analýze.")
     return "FALLBACK_GENERIC_CONTENT"
 
 # AI API funkce
