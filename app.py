@@ -92,14 +92,13 @@ with st.sidebar:
 col1, col2 = st.columns(2)
 
 with col1:
-    brand = st.text_input("🏷️ Brand", value="taste", help="Název značky k hledání")
-    domena = st.text_input("🌐 Doména", value="taste.cz", help="Webová doména (bez https://)")
+    brand = st.text_input("🏷️ Brand", placeholder="Brand")
+    domena = st.text_input("🌐 Doména", placeholder="https://www.zadej-domenu.cz/")
 
 with col2:
     zeme = st.selectbox(
         "🌍 Země",
-        ["Česká republika", "Slovensko", "Polsko", "Německo", "Rakousko", "Maďarsko"],
-        help="Země pro doporučení společností"
+        ["Česká republika", "Slovensko", "Polsko", "Německo", "Rakousko", "Maďarsko"]
     )
 
 # Funkce pro web scraping
