@@ -1,12 +1,4 @@
-.stButton > button {
-        background-color: #22c55e !important;
-        color: white !important;
-        border: none !important;
-    }
-    .stButton > button:hover {
-        background-color: #16a34a !important;
-        color: white !important;
-    }import streamlit as st
+import streamlit as st
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -62,6 +54,15 @@ st.markdown("""
         border-left: 4px solid #dc3545;
         margin: 1rem 0;
     }
+    .stButton > button {
+        background-color: #22c55e !important;
+        color: white !important;
+        border: none !important;
+    }
+    .stButton > button:hover {
+        background-color: #16a34a !important;
+        color: white !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -81,7 +82,7 @@ with st.sidebar:
     2. **Klikněte** na "Spustit analýzu"  
     3. **Počkejte** na dokončení (několik minut)
     4. **Prohlédněte** si výsledky
-    5. **Stáhněte** data jako CSV
+    5. **Stáhněte** data jako Excel
     """)
     
     st.markdown("---")
@@ -400,13 +401,13 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
         styled_df = analysis_df.style.applymap(highlight_results, subset=['Brand', 'Doména'])
         st.dataframe(styled_df, use_container_width=True)
         
-        # CSV download pro analýzu
-        csv_analysis = analysis_df.to_csv(index=False, encoding='utf-8')
+        # Excel download pro analýzu
+        excel_analysis = create_excel_download(analysis_df, f"ai_analysis_{metadata['brand']}")
         st.download_button(
-            label="💾 Stáhnout analýzu jako CSV",
-            data=csv_analysis,
-            file_name=f"ai_analysis_{metadata['brand']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
+            label="📊 Stáhnout analýzu jako Excel",
+            data=excel_analysis,
+            file_name=f"ai_analysis_{metadata['brand']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     
     with tab3:
@@ -439,8 +440,6 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
         })
         ai_stats.columns = ['Brand zmínky', 'Doména zmínky']
         st.dataframe(ai_stats)
-
-
 
 # Footer
 st.markdown("---")
