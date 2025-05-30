@@ -105,7 +105,7 @@ with col2:
 # Funkce pro web scraping
 def scrape_website(domain: str) -> str:
     """Stáhne a zpracuje obsah webové stránky"""
-    urls_to_try = [f"https://{domain}", f"http://{domain}"]
+    urls_to_try = [f"https://{domain}", f"http://{domain}", f"https://www.{domain}", f"http://www.{domain}"]
     
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -113,7 +113,13 @@ def scrape_website(domain: str) -> str:
     
     for url in urls_to_try:
         try:
-            response = requests.get(url, headers=headers, timeout=30, allow_redirects=True)
+            response = requests.get(
+                url, 
+                headers=headers, 
+                timeout=30, 
+                allow_redirects=True,
+                max_redirects=5  # Omezení redirectů
+            )
             if response.status_code == 200:
                 soup = BeautifulSoup(response.content, 'html.parser')
                 
@@ -131,13 +137,25 @@ def scrape_website(domain: str) -> str:
                 if len(text) > MAX_LENGTH:
                     text = text[:MAX_LENGTH] + "... (text byl zkrácen)"
                 
+                # Kontrola, zda jsme získali smysluplný obsah
+                if len(text.strip()) < 100:
+                    continue  # Zkusit další URL
+                
                 return text
                 
+        except requests.exceptions.TooManyRedirects:
+            st.warning(f"⚠️ Příliš mnoho redirectů pro {url} - zkouším další variantu...")
+            continue
+        except requests.exceptions.Timeout:
+            st.warning(f"⚠️ Timeout pro {url} - zkouším další variantu...")
+            continue
         except Exception as e:
-            st.error(f"Chyba při načítání {url}: {str(e)}")
+            st.warning(f"⚠️ Chyba při načítání {url}: {str(e)} - zkouším další variantu...")
             continue
     
-    return f"CHYBA: Nepodařilo se načíst stránku {domain}"
+    # Fallback - použijeme obecné oblasti
+    st.warning(f"⚠️ Nepodařilo se načíst obsah z {domain}. Použiji obecné oblasti marketingu.")
+    return "FALLBACK_GENERIC_CONTENT"
 
 # AI API funkce
 def query_openai(prompt: str, api_key: str) -> str:
@@ -180,6 +198,17 @@ def query_gemini(prompt: str, api_key: str) -> str:
 
 def extract_business_areas(content: str, api_key: str) -> List[str]:
     """Extrakce oblastí podnikání z obsahu webu pomocí AI"""
+    
+    # Fallback pro problémy se scrapingem
+    if content == "FALLBACK_GENERIC_CONTENT":
+        return [
+            "1. Online marketing a reklama (PPC, RTB, sociální sítě)",
+            "2. SEO a analytika (optimalizace pro vyhledávače, analýza dat)", 
+            "3. Strategie a branding (nastavení značky, poznání zákazníků)",
+            "4. Sociální sítě a kreativní řešení (dlouhodobý plán, video)",
+            "5. Školení a workshopy (digitální marketing, analytika)"
+        ]
+    
     prompt = f"""Analyzuj následující text z webové stránky a identifikuj maximálně 5 klíčových oblastí podnikání nebo témat, kterým se tato stránka/společnost věnuje. Každou oblast uveď na nový řádek. Pokud nelze identifikovat žádné smysluplné oblasti, odpověz "Nebylo možné identifikovat oblasti".
 
 Text:
@@ -272,6 +301,7 @@ if st.session_state.button_state == 'running':
     
     if website_content.startswith("CHYBA:"):
         st.markdown(f'<div class="error-card">{website_content}</div>', unsafe_allow_html=True)
+        st.session_state.button_state = 'ready'  # Reset tlačítka
         st.stop()
     
     # Krok 2: Extrakce oblastí
@@ -283,6 +313,7 @@ if st.session_state.button_state == 'running':
     if not business_areas or (len(business_areas) == 1 and ("Chyba" in business_areas[0] or "nebylo možné" in business_areas[0].lower())):
         st.markdown('<div class="error-card">❌ Nepodařilo se identifikovat oblasti podnikání</div>', unsafe_allow_html=True)
         st.write("Extrahované oblasti:", business_areas)
+        st.session_state.button_state = 'ready'  # Reset tlačítka
         st.stop()
     
     st.markdown('<div class="success-card">✅ <strong>Identifikované oblasti:</strong><br>' + '<br>'.join([f"• {area}" for area in business_areas]) + '</div>', unsafe_allow_html=True)
@@ -368,9 +399,14 @@ if st.session_state.button_state == 'running':
     }
     
     status_text.markdown('<div class="success-card">✅ <strong>Analýza dokončena!</strong></div>', unsafe_allow_html=True)
+    
+    # Změna stavu tlačítka na dokončeno
+    st.session_state.button_state = 'finished'
+    
     time.sleep(1)
     progress_bar.empty()
     status_text.empty()
+    st.rerun()
 
 # Zobrazení výsledků (pokud existují)
 if 'analysis_results' in st.session_state and st.session_state.analysis_results:
