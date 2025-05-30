@@ -24,7 +24,7 @@ st.set_page_config(
 st.markdown("""
 <style>
     .main-header {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: #9A36F7;
         padding: 2rem;
         border-radius: 10px;
         color: white;
@@ -32,18 +32,18 @@ st.markdown("""
         margin-bottom: 2rem;
     }
     .status-card {
-        background: #b19cd9;
+        background: #9A36F7;
         padding: 1rem;
         border-radius: 8px;
-        border-left: 4px solid #8b5cf6;
+        border-left: 4px solid #7c2d9f;
         margin: 1rem 0;
         color: white;
     }
     .success-card {
-        background: #b19cd9;
+        background: #9A36F7;
         padding: 1rem;
         border-radius: 8px;
-        border-left: 4px solid #8b5cf6;
+        border-left: 4px solid #7c2d9f;
         margin: 1rem 0;
         color: white;
     }
@@ -228,7 +228,29 @@ def create_excel_download(df, filename):
     return output.getvalue()
 
 # Hlavní spouštěcí tlačítko
-if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
+button_placeholder = st.empty()
+
+# Inicializace session state pro tlačítko
+if 'button_state' not in st.session_state:
+    st.session_state.button_state = 'ready'
+
+# Zobrazení tlačítka podle stavu
+if st.session_state.button_state == 'ready':
+    if button_placeholder.button("🚀 Spustit analýzu", type="primary", use_container_width=True, key="start_button"):
+        st.session_state.button_state = 'running'
+        st.rerun()
+elif st.session_state.button_state == 'running':
+    button_placeholder.button("⏳ Analýza probíhá...", type="primary", use_container_width=True, disabled=True, key="running_button")
+elif st.session_state.button_state == 'finished':
+    if button_placeholder.button("✅ Analýza hotova - Spustit znovu", type="primary", use_container_width=True, key="finished_button"):
+        st.session_state.button_state = 'running'
+        # Vymazání starých výsledků
+        if 'analysis_results' in st.session_state:
+            del st.session_state.analysis_results
+        st.rerun()
+
+# Spuštění analýzy
+if st.session_state.button_state == 'running':
     
     if not domena:
         st.error("⚠️ Vyplňte prosím doménu!")
