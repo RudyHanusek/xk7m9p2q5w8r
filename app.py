@@ -38,11 +38,12 @@ st.markdown("""
         margin: 1rem 0;
     }
     .success-card {
-        background: #d4edda;
+        background: #b19cd9;
         padding: 1rem;
         border-radius: 8px;
-        border-left: 4px solid #28a745;
+        border-left: 4px solid #8b5cf6;
         margin: 1rem 0;
+        color: white;
     }
     .error-card {
         background: #f8d7da;
@@ -224,7 +225,7 @@ if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
     
     # Krok 1: Web scraping
     status_text.markdown('<div class="status-card">🕸️ <strong>Krok 1/4:</strong> Stahuji obsah webu...</div>', unsafe_allow_html=True)
-    progress_bar.progress(10)
+    progress_bar.progress(0.1)
     
     website_content = scrape_website(domena)
     
@@ -234,7 +235,7 @@ if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
     
     # Krok 2: Extrakce oblastí
     status_text.markdown('<div class="status-card">🧠 <strong>Krok 2/4:</strong> Analyzuji oblasti podnikání...</div>', unsafe_allow_html=True)
-    progress_bar.progress(25)
+    progress_bar.progress(0.25)
     
     business_areas = extract_business_areas(website_content, gemini_key)
     
@@ -263,7 +264,7 @@ if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
         
         # ChatGPT
         current_query += 1
-        progress_bar.progress(25 + (current_query / total_queries) * 50)
+        progress_bar.progress(0.25 + (current_query / total_queries) * 0.5)
         status_text.markdown(f'<div class="status-card">🤖 Dotazuji ChatGPT ({current_query}/{total_queries})...</div>', unsafe_allow_html=True)
         
         gpt_response = query_openai(query, openai_key)
@@ -274,7 +275,7 @@ if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
         
         # Claude AI
         current_query += 1
-        progress_bar.progress(25 + (current_query / total_queries) * 50)
+        progress_bar.progress(0.25 + (current_query / total_queries) * 0.5)
         status_text.markdown(f'<div class="status-card">🧠 Dotazuji Claude AI ({current_query}/{total_queries})...</div>', unsafe_allow_html=True)
         
         claude_response = query_claude(query, anthropic_key)
@@ -285,7 +286,7 @@ if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
         
         # Gemini
         current_query += 1
-        progress_bar.progress(25 + (current_query / total_queries) * 50)
+        progress_bar.progress(0.25 + (current_query / total_queries) * 0.5)
         status_text.markdown(f'<div class="status-card">✨ Dotazuji Gemini ({current_query}/{total_queries})...</div>', unsafe_allow_html=True)
         
         gemini_response = query_gemini(query, gemini_key)
@@ -310,7 +311,7 @@ if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
     
     # Krok 4: Finalizace
     status_text.markdown('<div class="status-card">📊 <strong>Krok 4/4:</strong> Finalizuji výsledky...</div>', unsafe_allow_html=True)
-    progress_bar.progress(100)
+    progress_bar.progress(1.0)
     
     # Uložení do session state
     st.session_state.analysis_results = {
