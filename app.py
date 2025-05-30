@@ -128,16 +128,14 @@ def scrape_website(domain: str) -> str:
     session = requests.Session()
     session.max_redirects = 3
     
-    for i, url in enumerate(urls_to_try, 1):
+    for url in urls_to_try:
         try:
-            st.write(f"🔍 Zkouším URL {i}/{len(urls_to_try)}: {url}")
-            
             response = session.get(
                 url, 
                 headers=headers, 
-                timeout=15,  # Kratší timeout
+                timeout=15,
                 allow_redirects=True,
-                verify=False  # Přeskočit SSL verifikaci pro problematické weby
+                verify=False
             )
             
             if response.status_code == 200:
@@ -159,26 +157,11 @@ def scrape_website(domain: str) -> str:
                 
                 # Kontrola, zda jsme získali smysluplný obsah
                 if len(text.strip()) < 50:
-                    st.warning(f"⚠️ Příliš málo obsahu z {url} - zkouším další...")
                     continue
                 
-                st.success(f"✅ Úspěšně načten obsah z {url}")
                 return text
                 
-        except requests.exceptions.SSLError:
-            st.warning(f"⚠️ SSL chyba pro {url} - zkouším další variantu...")
-            continue
-        except requests.exceptions.ConnectionError:
-            st.warning(f"⚠️ Chyba připojení k {url} - zkouším další variantu...")
-            continue
-        except requests.exceptions.Timeout:
-            st.warning(f"⚠️ Timeout pro {url} - zkouším další variantu...")
-            continue
-        except requests.exceptions.TooManyRedirects:
-            st.warning(f"⚠️ Příliš mnoho redirectů pro {url} - zkouším další variantu...")
-            continue
-        except Exception as e:
-            st.warning(f"⚠️ Neočekávaná chyba pro {url}: {str(e)}")
+        except:
             continue
     
     # Fallback - použijeme obecné oblasti
@@ -311,6 +294,7 @@ if st.session_state.button_state == 'running':
     
     if not domena:
         st.error("⚠️ Vyplňte prosím doménu!")
+        st.session_state.button_state = 'ready'
         st.stop()
     
     # Inicializace session state pro výsledky
@@ -329,7 +313,7 @@ if st.session_state.button_state == 'running':
     
     if website_content.startswith("CHYBA:"):
         st.markdown(f'<div class="error-card">{website_content}</div>', unsafe_allow_html=True)
-        st.session_state.button_state = 'ready'  # Reset tlačítka
+        st.session_state.button_state = 'ready'
         st.stop()
     
     # Krok 2: Extrakce oblastí
@@ -341,7 +325,7 @@ if st.session_state.button_state == 'running':
     if not business_areas or (len(business_areas) == 1 and ("Chyba" in business_areas[0] or "nebylo možné" in business_areas[0].lower())):
         st.markdown('<div class="error-card">❌ Nepodařilo se identifikovat oblasti podnikání</div>', unsafe_allow_html=True)
         st.write("Extrahované oblasti:", business_areas)
-        st.session_state.button_state = 'ready'  # Reset tlačítka
+        st.session_state.button_state = 'ready'
         st.stop()
     
     st.markdown('<div class="success-card">✅ <strong>Identifikované oblasti:</strong><br>' + '<br>'.join([f"• {area}" for area in business_areas]) + '</div>', unsafe_allow_html=True)
