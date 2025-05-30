@@ -1,4 +1,12 @@
-import streamlit as st
+.stButton > button {
+        background-color: #22c55e !important;
+        color: white !important;
+        border: none !important;
+    }
+    .stButton > button:hover {
+        background-color: #16a34a !important;
+        color: white !important;
+    }import streamlit as st
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -10,6 +18,7 @@ import openai
 import anthropic
 import google.generativeai as genai
 from typing import List, Dict, Tuple
+from io import BytesIO
 
 # Konfigurace stránky
 st.set_page_config(
@@ -31,11 +40,12 @@ st.markdown("""
         margin-bottom: 2rem;
     }
     .status-card {
-        background: #f8f9fa;
+        background: #b19cd9;
         padding: 1rem;
         border-radius: 8px;
-        border-left: 4px solid #007bff;
+        border-left: 4px solid #8b5cf6;
         margin: 1rem 0;
+        color: white;
     }
     .success-card {
         background: #b19cd9;
@@ -208,6 +218,14 @@ except KeyError as e:
     st.error(f"❌ Chybějící API klíč v konfiguraci: {e}")
     st.stop()
 
+def create_excel_download(df, filename):
+    """Vytvoří Excel soubor pro download"""
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Data')
+    output.seek(0)
+    return output.getvalue()
+
 # Hlavní spouštěcí tlačítko
 if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
     
@@ -358,13 +376,13 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
         responses_df = pd.DataFrame(results['responses'])
         st.dataframe(responses_df, use_container_width=True, height=600)
         
-        # CSV download pro odpovědi
-        csv_responses = responses_df.to_csv(index=False, encoding='utf-8')
+        # Excel download pro odpovědi
+        excel_responses = create_excel_download(responses_df, f"ai_responses_{metadata['brand']}")
         st.download_button(
-            label="💾 Stáhnout odpovědi jako CSV",
-            data=csv_responses,
-            file_name=f"ai_responses_{metadata['brand']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
+            label="📊 Stáhnout odpovědi jako Excel",
+            data=excel_responses,
+            file_name=f"ai_responses_{metadata['brand']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     
     with tab2:
