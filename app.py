@@ -111,14 +111,17 @@ def scrape_website(domain: str) -> str:
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
     
+    # Session s omezeným počtem redirectů
+    session = requests.Session()
+    session.max_redirects = 5
+    
     for url in urls_to_try:
         try:
-            response = requests.get(
+            response = session.get(
                 url, 
                 headers=headers, 
                 timeout=30, 
-                allow_redirects=True,
-                max_redirects=5  # Omezení redirectů
+                allow_redirects=True
             )
             if response.status_code == 200:
                 soup = BeautifulSoup(response.content, 'html.parser')
