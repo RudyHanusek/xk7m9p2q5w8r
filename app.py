@@ -62,26 +62,19 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar pro API klíče
+# Sidebar s návodem
 with st.sidebar:
-    st.header("🔑 API Konfigurace")
-    
-    openai_key = st.text_input("OpenAI API Key", type="password", help="sk-...")
-    anthropic_key = st.text_input("Anthropic API Key", type="password", help="sk-ant-...")
-    gemini_key = st.text_input("Google Gemini API Key", type="password", help="AIza...")
-    
-    st.markdown("---")
+    st.header("📋 Návod použití")
     st.markdown("""
-    **📋 Návod:**
-    1. Vyplňte všechny API klíče
-    2. Zadejte údaje o značce
-    3. Klikněte na "Spustit analýzu"
-    4. Počkejte na dokončení (několik minut)
-    5. Stáhněte výsledky
+    1. **Zadejte údaje** o značce a doméně
+    2. **Klikněte** na "Spustit analýzu"  
+    3. **Počkejte** na dokončení (několik minut)
+    4. **Prohlédněte** si výsledky
+    5. **Stáhněte** data jako CSV
     """)
     
     st.markdown("---")
-    st.warning("⚠️ Před spuštěním si vytvořte kopii výsledků!")
+    st.info("🔧 API klíče jsou předkonfigurovány")
 
 # Hlavní formulář
 col1, col2 = st.columns(2)
@@ -205,12 +198,17 @@ def intelligent_check(text: str, search_term: str) -> str:
     
     return "✅ Ano" if normalized_search in normalized_text else "❌ Ne"
 
+# Načtení API klíčů ze secrets
+try:
+    openai_key = st.secrets["api_keys"]["openai"]
+    anthropic_key = st.secrets["api_keys"]["anthropic"] 
+    gemini_key = st.secrets["api_keys"]["gemini"]
+except KeyError as e:
+    st.error(f"❌ Chybějící API klíč v konfiguraci: {e}")
+    st.stop()
+
 # Hlavní spouštěcí tlačítko
 if st.button("🚀 Spustit analýzu", type="primary", use_container_width=True):
-    # Kontrola API klíčů
-    if not all([openai_key, anthropic_key, gemini_key]):
-        st.error("⚠️ Vyplňte prosím všechny API klíče v postranním panelu!")
-        st.stop()
     
     if not domena:
         st.error("⚠️ Vyplňte prosím doménu!")
@@ -423,26 +421,7 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
         ai_stats.columns = ['Brand zmínky', 'Doména zmínky']
         st.dataframe(ai_stats)
 
-# Informační sekce
-with st.expander("ℹ️ Jak nástroj funguje"):
-    st.markdown("""
-    **Tento nástroj provádí komplexní analýzu v 4 krocích:**
-    
-    1. **🕸️ Web Scraping** - Stáhne a vyčistí obsah z vaší domény
-    2. **🧠 AI Analýza** - Gemini identifikuje klíčové oblasti podnikání z obsahu
-    3. **🤖 Multi-AI Dotazování** - Pro každou oblast se zeptá 3 AI modelů na doporučení
-    4. **📊 Analýza Zmínek** - Kontroluje, zda AI zmínily váš brand/doménu
-    
-    **Výstupy:**
-    - **Souhrn odpovědí** - Všechny odpovědi od AI modelů
-    - **Analýza zmínek** - ✅/❌ tabulka pro brand a doménu
-    - **Statistiky** - Přehled úspěšnosti podle AI modelů
-    
-    **Potřebujete:**
-    - API klíče pro OpenAI, Anthropic a Google Gemini
-    - Funkční webovou stránku pro analýzu
-    - Dostatečný kredit na API účtech
-    """)
+
 
 # Footer
 st.markdown("---")
