@@ -14,7 +14,7 @@ from io import BytesIO
 
 # Konfigurace stránky
 st.set_page_config(
-    page_title="AI Visibility Tool",
+    page_title="AI Visibility Auditor",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -69,7 +69,7 @@ st.markdown("""
 # Hlavičku aplikace
 st.markdown("""
 <div class="main-header">
-    <h1>🔍 AI Visibility Tool</h1>
+    <h1>🔍 AI Visibility Auditor</h1>
     <p>Ověření zobrazení značky v AI - Komplexní analýza</p>
 </div>
 """, unsafe_allow_html=True)
@@ -513,4 +513,4 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
 
 # Footer
 st.markdown("---")
-st.markdown("*🔍 AI Visibility Tool - Vytvořeno pro analýzu zmínek značky v AI odpovědích*")
+st.markdown("*🔍 AI Visibility Auditor - Vytvořeno pro analýzu zmínek značky v AI odpovědích*")
