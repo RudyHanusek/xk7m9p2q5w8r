@@ -412,3 +412,4 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
 
 st.markdown("---")
 st.markdown("*🔍 AI Visibility Auditor - Vytvořeno pro analýzu zmínek značky v AI odpovědích*")
+
