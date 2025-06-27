@@ -281,11 +281,6 @@ if st.session_state.button_state == 'running':
         if not clean_area or "Chyba" in clean_area or "nebylo možné" in clean_area.lower():
             continue
         cleaned_area = clean_area_text(clean_area)
-        
-        # Debug výpisy pro kontrolu
-        st.write(f"--- Debug: původní oblast: {clean_area}")
-        st.write(f"--- Debug: očištěná oblast: {cleaned_area}")
-        
         query = f'Jaké společnosti z oblasti {cleaned_area} doporučuješ v zemi {zeme}?'
         current_query += 1
         progress_bar.progress(0.25 + (current_query / total_queries) * 0.5)
@@ -412,4 +407,3 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
 
 st.markdown("---")
 st.markdown("*🔍 AI Visibility Auditor - Vytvořeno pro analýzu zmínek značky v AI odpovědích*")
-
