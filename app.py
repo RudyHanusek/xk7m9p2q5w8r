@@ -340,7 +340,16 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
     results = st.session_state.analysis_results
     st.markdown("---")
     st.header("📊 Výsledky analýzy")
-    metadata = results['metadata']
+    
+    # Přidáme CSS pro menší font u metrik
+    st.markdown("""
+    <style>
+    .metric-label, .metric-value {
+        font-size: 0.9rem !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Brand", metadata['brand'])
@@ -350,6 +359,7 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
         st.metric("Země", metadata['country'])
     with col4:
         st.metric("Nalezené oblasti", metadata['areas_found'])
+
     tab1, tab2, tab3 = st.tabs(["📋 Souhrn odpovědí AI", "📊 Analýza zmínek", "📈 Statistiky"])
     with tab1:
         st.subheader("Všechny odpovědi AI modelů")
