@@ -341,35 +341,35 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
     st.markdown("---")
     st.header("📊 Výsledky analýzy")
     
-    # Přidáme CSS pro menší font u metrik
+    # Zmenšení fontu pouze hodnot metrik
     st.markdown("""
     <style>
-    .metric-label, .metric-value {
-        font-size: 0.9rem !important;
-    }
+        div[data-testid="stMetricValue"] {
+            font-size: 0.9rem !important;
+        }
     </style>
     """, unsafe_allow_html=True)
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.metric("Brand", metadata['brand'])
+        st.metric("Brand", results['metadata']['brand'])
     with col2:
-        st.metric("Doména", metadata['domain'])
+        st.metric("Doména", results['metadata']['domain'])
     with col3:
-        st.metric("Země", metadata['country'])
+        st.metric("Země", results['metadata']['country'])
     with col4:
-        st.metric("Nalezené oblasti", metadata['areas_found'])
+        st.metric("Nalezené oblasti", results['metadata']['areas_found'])
 
     tab1, tab2, tab3 = st.tabs(["📋 Souhrn odpovědí AI", "📊 Analýza zmínek", "📈 Statistiky"])
     with tab1:
         st.subheader("Všechny odpovědi AI modelů")
         responses_df = pd.DataFrame(results['responses'])
         st.dataframe(responses_df, use_container_width=True, height=600)
-        excel_responses = create_excel_download(responses_df, f"ai_responses_{metadata['brand']}")
+        excel_responses = create_excel_download(responses_df, f"ai_responses_{results['metadata']['brand']}")
         st.download_button(
             label="📊 Stáhnout odpovědi jako Excel",
             data=excel_responses,
-            file_name=f"ai_responses_{metadata['brand']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+            file_name=f"ai_responses_{results['metadata']['brand']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     with tab2:
@@ -383,11 +383,11 @@ if 'analysis_results' in st.session_state and st.session_state.analysis_results:
             return ''
         styled_df = analysis_df.style.applymap(highlight_results, subset=['Brand', 'Doména'])
         st.dataframe(styled_df, use_container_width=True)
-        excel_analysis = create_excel_download(analysis_df, f"ai_analysis_{metadata['brand']}")
+        excel_analysis = create_excel_download(analysis_df, f"ai_analysis_{results['metadata']['brand']}")
         st.download_button(
             label="📊 Stáhnout analýzu jako Excel",
             data=excel_analysis,
-            file_name=f"ai_analysis_{metadata['brand']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
+            file_name=f"ai_analysis_{results['metadata']['brand']}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     with tab3:
