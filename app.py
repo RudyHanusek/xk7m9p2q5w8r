@@ -12,18 +12,13 @@ import google.generativeai as genai
 from typing import List, Dict, Tuple
 from io import BytesIO
 
-# Funkce pro úpravu oblasti
 def clean_area_text(area: str) -> str:
-    # Odstranit číslo a tečku na začátku např. "1. "
     area = re.sub(r'^\d+\.\s*', '', area)
-    # Odstranit uvozovky (pro jistotu)
     area = area.replace('"', '')
-    # Převést první znak na malé písmeno (pokud je)
     if area:
         area = area[0].lower() + area[1:]
     return area
 
-# Konfigurace stránky
 st.set_page_config(
     page_title="AI Visibility Auditor",
     page_icon="🔍",
@@ -31,7 +26,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS pro lepší vzhled
 st.markdown("""
 <style>
     .main-header {
@@ -77,7 +71,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Hlavička aplikace
 st.markdown("""
 <div class="main-header">
     <h1>🔍 AI Visibility Auditor</h1>
@@ -85,7 +78,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar s návodem
 with st.sidebar:
     st.header("📋 Návod použití")
     st.markdown("""
@@ -95,11 +87,9 @@ with st.sidebar:
     4. **Prohlédněte** si výsledky
     5. **Stáhněte** data jako Excel
     """)
-    
     st.markdown("---")
     st.info("🔧 API klíče jsou předkonfigurovány")
 
-# Hlavní formulář
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -114,7 +104,6 @@ with col3:
         ["Česká republika", "Slovensko", "Polsko", "Německo", "Rakousko", "Maďarsko"]
     )
 
-# Funkce pro web scraping
 def scrape_website(domain: str) -> str:
     clean_domain = domain.replace("https://", "").replace("http://", "").replace("www.", "").strip("/")
     urls_to_try = [
@@ -159,7 +148,6 @@ def scrape_website(domain: str) -> str:
     st.info(f"ℹ️ Nepodařilo se načíst obsah z {clean_domain}. Aplikace použije obecné oblasti marketingu a bude pokračovat v analýze.")
     return "FALLBACK_GENERIC_CONTENT"
 
-# AI API funkce
 def query_openai(prompt: str, api_key: str) -> str:
     try:
         client = openai.OpenAI(api_key=api_key)
@@ -293,6 +281,11 @@ if st.session_state.button_state == 'running':
         if not clean_area or "Chyba" in clean_area or "nebylo možné" in clean_area.lower():
             continue
         cleaned_area = clean_area_text(clean_area)
+        
+        # Debug výpisy pro kontrolu
+        st.write(f"--- Debug: původní oblast: {clean_area}")
+        st.write(f"--- Debug: očištěná oblast: {cleaned_area}")
+        
         query = f'Jaké společnosti z oblasti {cleaned_area} doporučuješ v zemi {zeme}?'
         current_query += 1
         progress_bar.progress(0.25 + (current_query / total_queries) * 0.5)
